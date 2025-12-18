@@ -50,14 +50,14 @@ def find_insert_index_last_pct(tokenizer, messages, last_pct):
     return len(messages), total
 
 
-def main(argv=None) -> int:
+def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="meta-llama/Llama-3.2-1B-Instruct")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--n", type=int, default=1)
     parser.add_argument("--last_pct", type=float, default=0.10)
     parser.add_argument("--max_new_tokens", type=int, default=32)
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
 
     random.seed(args.seed)
 
@@ -78,25 +78,27 @@ def main(argv=None) -> int:
     for i, idx in enumerate(indices, 1):
         ex = ds[idx]
         base = build_messages(ex)
-        insert_at, total_tokens = find_insert_index_last_pct(tok, base, last_pct=args.last_pct)
+        insert_at, total_tokens = find_insert_index_last_pct(tok, base, args.last_pct)
 
         msgs = base[:insert_at] + [needle_msg] + base[insert_at:]
         msgs.append({"role": "user", "content": QUESTION})
 
-        input_ids = tok.apply_chat_template(
+        inputs = tok.apply_chat_template(
             msgs,
             add_generation_prompt=True,
             return_tensors="pt",
+            return_dict=True,
         ).to(model.device)
+
         with torch.no_grad():
             out = model.generate(
-                input_ids=input_ids,
+                **inputs,
                 max_new_tokens=args.max_new_tokens,
                 do_sample=False,
                 pad_token_id=tok.pad_token_id,
                 eos_token_id=tok.eos_token_id,
             )
-        answer = tok.decode(out[0, input_ids.shape[-1] :], skip_special_tokens=True).strip()
+        answer = tok.decode(out[0, inputs["input_ids"].shape[-1] :], skip_special_tokens=True).strip()
 
         ok = needle in answer
         correct += int(ok)
