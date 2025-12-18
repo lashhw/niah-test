@@ -11,7 +11,7 @@ import random
 
 import torch
 from datasets import load_dataset
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 DATASET_NAME = "jiawei-ucas/ConsistentChat"
 SPLIT = "train"
@@ -45,11 +45,11 @@ def find_insert_index_last_pct(tokenizer, messages, last_pct):
     target = int(total * (1.0 - last_pct))  # insert at start of last X% tokens
     for i in range(len(messages) + 1):
         if n_tokens(tokenizer, messages[:i]) >= target:
-            return i, total
-    return len(messages), total
+            return i
+    return len(messages)
 
 
-def main() -> int:
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="meta-llama/Llama-3.2-1B-Instruct")
     parser.add_argument("--seed", type=int, default=0)
@@ -72,12 +72,10 @@ def main() -> int:
     indices = random.sample(range(len(ds)), k=min(args.n, len(ds)))
     correct = 0
 
-    for i, idx in enumerate(indices, 1):
+    for idx in indices:
         ex = ds[idx]
-        base = build_messages(ex)
-        insert_at, total_tokens = find_insert_index_last_pct(tok, base, args.last_pct)
-
-        msgs = list(base)
+        msgs = build_messages(ex)
+        insert_at = find_insert_index_last_pct(tok, msgs, args.last_pct)
         needle_at = min(max(insert_at - 1, 0), len(msgs) - 1)
         msgs[needle_at]["content"] = msgs[needle_at]["content"] + " " + NEEDLE_TEXT.format(needle=needle)
         msgs.append({"role": "user", "content": QUESTION})
@@ -102,7 +100,6 @@ def main() -> int:
 
     total = len(indices)
     print(f"\naccuracy: {correct}/{total} = {correct/total:.3f}")
-    return 0
 
 
 if __name__ == "__main__":
