@@ -26,7 +26,7 @@ The dataset is cached locally in this environment, so it should load without ext
 
 ## Needle-In-A-Haystack (NIAH) test
 
-`niah_consistentchat.py` inserts a "needle" (a secret code) into the chat near the end of the context (by token position), then appends a retrieval question and checks exact-match accuracy using `meta-llama/Llama-3.2-1B-Instruct`.
+`niah_consistentchat.py` inserts a "needle" (a secret code) into the `train` split chat near the end of the context (by token position), then appends a retrieval question and checks exact-match accuracy using `meta-llama/Llama-3.2-1B-Instruct`.
 
 Examples:
 

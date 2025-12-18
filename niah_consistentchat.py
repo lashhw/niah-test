@@ -16,15 +16,17 @@ from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 DATASET_NAME = "jiawei-ucas/ConsistentChat"
-NEEDLE_TEXT = "IMPORTANT: The secret code is {needle}. Remember it exactly."
+SPLIT = "train"
+NEEDLE_TEXT = "By the way, the secret code is {needle}. Remember it exactly."
 QUESTION = "What is the secret code? Reply with only the code."
 
 
 def _role(from_field: str) -> str:
-    t = (from_field or "").strip().lower()
-    if t in {"gpt", "assistant", "model"}:
+    if from_field == "human":
+        return "user"
+    if from_field == "gpt":
         return "assistant"
-    return "user"  # includes "human"
+    raise ValueError(f"Unexpected role in dataset: {from_field!r}")
 
 
 def build_messages(example):
@@ -57,7 +59,6 @@ def find_insert_index_last_pct(tokenizer, messages, last_pct: float, min_index: 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="meta-llama/Llama-3.2-1B-Instruct")
-    parser.add_argument("--split", default="train")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--n", type=int, default=1)
     parser.add_argument("--last_pct", type=float, default=0.10)
@@ -66,22 +67,16 @@ def main(argv=None) -> int:
 
     random.seed(args.seed)
 
-    dataset = load_dataset(DATASET_NAME)
-    if args.split not in dataset:
-        raise SystemExit(f'Unknown split "{args.split}". Available: {list(dataset.keys())}')
-    ds = dataset[args.split]
+    ds = load_dataset(DATASET_NAME)[SPLIT]
 
     tok = AutoTokenizer.from_pretrained(args.model)
-    if tok.pad_token_id is None and tok.eos_token_id is not None:
-        tok.pad_token_id = tok.eos_token_id
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
         torch_dtype="auto",
-        device_map="cuda",
+        device_map="auto",
     )
-    model.eval()
 
-    needle = str(random.randint(10**7, 10**8 - 1))
+    needle = str(random.randint(10**5, 10**6 - 1))
     needle_msg = {"role": "user", "content": NEEDLE_TEXT.format(needle=needle)}
     indices = random.sample(range(len(ds)), k=min(args.n, len(ds)))
     correct = 0
@@ -126,4 +121,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
