@@ -71,7 +71,6 @@ def main() -> int:
     )
 
     needle = str(random.randint(10**8, 10**9 - 1))
-    needle_msg = {"role": "user", "content": NEEDLE_TEXT.format(needle=needle)}
     indices = random.sample(range(len(ds)), k=min(args.n, len(ds)))
     correct = 0
 
@@ -80,7 +79,9 @@ def main() -> int:
         base = build_messages(ex)
         insert_at, total_tokens = find_insert_index_last_pct(tok, base, args.last_pct)
 
-        msgs = base[:insert_at] + [needle_msg] + base[insert_at:]
+        msgs = list(base)
+        needle_at = min(max(insert_at - 1, 0), len(msgs) - 1)
+        msgs[needle_at]["content"] = msgs[needle_at]["content"] + " " + NEEDLE_TEXT.format(needle=needle)
         msgs.append({"role": "user", "content": QUESTION})
 
         inputs = tok.apply_chat_template(
