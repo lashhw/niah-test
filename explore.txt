@@ -1,0 +1,133 @@
+$ python explore_consistentchat.py --print-dataset --show-features --show-stats
+DatasetDict({
+    train: Dataset({
+        features: ['id', 'intent', 'scenario', 'conversations', 'information_flow'],
+        num_rows: 14461
+    })
+})
+
+== Split: train ==
+rows: 14461
+
+features:
+{'conversations': List({'from': Value('string'), 'value': Value('string')}),
+ 'id': Value('int64'),
+ 'information_flow': Value('string'),
+ 'intent': Value('string'),
+ 'scenario': Value('string')}
+
+keys:
+['conversations', 'id', 'information_flow', 'intent', 'scenario']
+
+missing_counts (approx, within scan window):
+{}
+
+type_counts:
+{'id': {'int': 14461}, 'intent': {'str': 14461}, 'scenario': {'str': 14461}, 'conversations': {'list': 14461}, 'information_flow': {'str': 14461}}
+
+conversation_field:
+conversations
+
+conversation_turns:
+{'min': 8.0, 'max': 16.0, 'avg': 15.517045847451767}
+
+
+$ python explore_consistentchat.py --split train --example-index 0
+
+== Split: train ==
+rows: 14461
+
+example:
+{'conversations': [{'from': 'human',
+                    'value': "Hey, do you have any tips for tracking my kid's "
+                             'growth at home? The doctor visits are so '
+                             'infrequent.'},
+                   {'from': 'gpt',
+                    'value': "Absolutely! Tracking your child's growth at home "
+                             'is a great idea, especially between doctor '
+                             'visits. You can start by using a simple growth '
+                             'chart and a measuring tape or a stadiometer for '
+                             'height, and a scale for weight. Mark their '
+                             'height on a wall or use a height chart, and '
+                             "weigh them on a reliable scale. It's also "
+                             'helpful to keep a record of these measurements '
+                             'in a notebook or a digital app designed for '
+                             'growth tracking.'},
+                   {'from': 'human',
+                    'value': "I've heard about growth charts, but how do I "
+                             'know which one to use for my little one?'},
+                   {'from': 'gpt',
+                    'value': "For growth charts, you'll want to use the ones "
+                             'provided by the World Health Organization (WHO) '
+                             'or the Centers for Disease Control and '
+                             'Prevention (CDC). The WHO charts are typically '
+                             'recommended for children under 2 years old, '
+                             'while the CDC charts are used for children 2 '
+                             'years and older. These charts are based on large '
+                             'populations and can help you understand how your '
+                             "child's growth compares to typical growth "
+                             'patterns.'},
+                   {'from': 'human',
+                    'value': 'What kind of measurements should I be taking? '
+                             'Just height and weight, or is there more to it?'},
+                   {'from': 'gpt',
+                    'value': 'In addition to height and weight, you can also '
+                             'measure head circumference, especially for '
+                             'infants and young children. Head circumference '
+                             'is important for monitoring brain development. '
+                             'For older children, you might also want to track '
+                             'body mass index (BMI) to ensure they are '
+                             'maintaining a healthy weight. Consistency is '
+                             'key, so try to measure at the same time of day '
+                             'and in the same conditions each time.'},
+                   {'from': 'human',
+                    'value': 'My child seems to be growing slower than the '
+                             'other kids in the playgroup. Should I be worried '
+                             'about this?'},
+                   {'from': 'gpt',
+                    'value': "It's important to remember that children grow at "
+                             'different rates. While it can be concerning to '
+                             'see your child growing more slowly than their '
+                             "peers, it's not necessarily a cause for worry. "
+                             'However, if you notice a significant deviation '
+                             'from their previous growth pattern or if they '
+                             'fall below the 5th percentile or above the 95th '
+                             "percentile on the growth chart, it's a good idea "
+                             'to discuss this with your pediatrician. They can '
+                             'provide a more detailed assessment and recommend '
+                             'any necessary tests or interventions.'},
+                   {'from': 'human',
+                    'value': 'How often should I be checking these '
+                             'measurements? Is it okay to do it weekly, or is '
+                             'that too much?'},
+                   {'from': 'gpt',
+                    'value': 'Checking measurements too frequently can lead to '
+                             "unnecessary stress. For infants, it's generally "
+                             'recommended to measure every 1-2 months. For '
+                             'toddlers and older children, every 3-6 months is '
+                             'sufficient. If you’re concerned about a specific '
+                             'issue, you can consult with your pediatrician '
+                             'for a personalized recommendation. Weekly '
+                             'measurements might be too frequent and could '
+                             'lead to over-analysis.'},
+                   {'from': 'human',
+                    'value': 'I noticed my child’s appetite has changed '
+                             'lately. Could this affect their growth '
+                             'patterns?'},
+                   {'from': 'gpt',
+                    'value': 'Changes in appetite can definitely affect growth '
+                             "patterns. If your child's appetite has decreased "
+                             "and you notice a change in their growth, it's "
+                             'worth monitoring closely. Sometimes, appetite '
+                             'changes can be due to temporary factors like '
+                             'illness, stress, or a growth spurt. However, if '
+                             "the change is persistent, it's a good idea to "
+                             'talk to your pediatrician. They can help '
+                             'identify any underlying issues and provide '
+                             'guidance on maintaining a balanced diet to '
+                             'support healthy growth.'}],
+ 'id': 1,
+ 'information_flow': 'From Problem Diagnosis to Solution Optimization; From '
+                     'Hypothesis Testing to Substantive Discussion',
+ 'intent': 'Health Consultation Interactions',
+ 'scenario': 'Child health and growth tracking'}
