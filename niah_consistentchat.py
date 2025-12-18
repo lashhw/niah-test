@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Needle-In-A-Haystack (NIAH) test for `jiawei-ucas/ConsistentChat`.
 
@@ -20,7 +19,7 @@ NEEDLE_TEXT = "By the way, the secret code is {needle}. Remember it exactly."
 QUESTION = "What is the secret code? Reply with only the code."
 
 
-def _role(from_field: str) -> str:
+def _role(from_field):
     if from_field == "human":
         return "user"
     if from_field == "gpt":
@@ -30,12 +29,12 @@ def _role(from_field: str) -> str:
 
 def build_messages(example):
     return [
-        {"role": _role(turn.get("from", "")), "content": str(turn.get("value", ""))}
+        {"role": _role(turn["from"]), "content": str(turn["value"])}
         for turn in example["conversations"]
     ]
 
 
-def n_tokens(tokenizer, messages) -> int:
+def n_tokens(tokenizer, messages):
     return len(tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False))
 
 
@@ -62,7 +61,6 @@ def main() -> int:
     random.seed(args.seed)
 
     ds = load_dataset(DATASET_NAME, split=SPLIT)
-
     tok = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
@@ -87,8 +85,8 @@ def main() -> int:
         inputs = tok.apply_chat_template(
             msgs,
             add_generation_prompt=True,
-            return_tensors="pt",
             return_dict=True,
+            return_tensors="pt",
         ).to(model.device)
 
         with torch.no_grad():
@@ -101,12 +99,6 @@ def main() -> int:
 
         ok = needle in answer
         correct += int(ok)
-
-        frac = n_tokens(tok, base[:insert_at]) / max(1, total_tokens)
-        print(f"[{i}/{len(indices)}] idx={idx} ok={ok} frac≈{frac:.3f}")
-        if not ok:
-            print(f"  expected={needle!r}")
-            print(f"  answer={answer!r}")
 
     total = len(indices)
     print(f"\naccuracy: {correct}/{total} = {correct/total:.3f}")
