@@ -55,6 +55,12 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--n", type=int, default=1)
     parser.add_argument("--last_pct", type=float, default=0.10)
+    parser.add_argument(
+        "--min_tokens",
+        type=int,
+        default=0,
+        help="If > 0, concatenate multiple conversations until the prompt reaches at least this many tokens (excluding generation).",
+    )
     parser.add_argument("--max_new_tokens", type=int, default=32)
     args = parser.parse_args()
 
@@ -75,6 +81,10 @@ def main():
     for idx in indices:
         ex = ds[idx]
         msgs = build_messages(ex)
+        if args.min_tokens:
+            while n_tokens(tok, msgs) < args.min_tokens:
+                msgs.extend(build_messages(ds[random.randrange(len(ds))]))
+
         insert_at = find_insert_index_last_pct(tok, msgs, args.last_pct)
         needle_at = min(max(insert_at - 1, 0), len(msgs) - 1)
         msgs[needle_at]["content"] = msgs[needle_at]["content"] + " " + NEEDLE_TEXT.format(needle=needle)
