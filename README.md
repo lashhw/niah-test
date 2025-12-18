@@ -17,9 +17,9 @@ print(dataset["train"][0])
 Run:
 
 ```bash
-python explore_consistentchat.py --print-dataset --show-features --show-stats
-python explore_consistentchat.py --split train --head 3
-python explore_consistentchat.py --split train --example-index 0
+./venv/bin/python explore_consistentchat.py --print-dataset --show-features --show-stats
+./venv/bin/python explore_consistentchat.py --split train --head 3
+./venv/bin/python explore_consistentchat.py --split train --example-index 0
 ```
 
 The dataset is cached locally in this environment, so it should load without extra flags.
@@ -32,14 +32,14 @@ Examples:
 
 ```bash
 # Default (tests 1 random chat; inserts at last 10% by tokens)
-python niah_consistentchat.py
+./venv/bin/python niah_consistentchat.py
 
 # Override the model
-python niah_consistentchat.py --model meta-llama/Llama-3.2-1B-Instruct
+./venv/bin/python niah_consistentchat.py --model meta-llama/Llama-3.2-1B-Instruct
 
 # Place needle near the very end (last 1% by tokens)
-python niah_consistentchat.py --last_pct 0.01
+./venv/bin/python niah_consistentchat.py --last_pct 0.01
 
 # Run on N random chats (deterministic with --seed)
-python niah_consistentchat.py --n 50 --seed 0
+./venv/bin/python niah_consistentchat.py --n 50 --seed 0
 ```

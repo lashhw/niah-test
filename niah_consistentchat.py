@@ -61,7 +61,7 @@ def main() -> int:
 
     random.seed(args.seed)
 
-    ds = load_dataset(DATASET_NAME)[SPLIT]
+    ds = load_dataset(DATASET_NAME, split=SPLIT)
 
     tok = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(
@@ -95,6 +95,7 @@ def main() -> int:
             out = model.generate(
                 **inputs,
                 max_new_tokens=args.max_new_tokens,
+                pad_token_id=tok.pad_token_id,
             )
         answer = tok.decode(out[0, inputs["input_ids"].shape[-1] :], skip_special_tokens=True).strip()
 
