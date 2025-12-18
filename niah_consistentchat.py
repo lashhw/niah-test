@@ -39,12 +39,12 @@ def n_tokens(tokenizer, messages) -> int:
     return len(tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False))
 
 
-def find_insert_index_last_pct(tokenizer, messages, last_pct: float, min_index: int):
+def find_insert_index_last_pct(tokenizer, messages, last_pct):
     if not (0.0 < last_pct <= 1.0):
         raise ValueError("--last_pct must be in (0, 1].")
     total = n_tokens(tokenizer, messages)
     target = int(total * (1.0 - last_pct))  # insert at start of last X% tokens
-    for i in range(min_index, len(messages) + 1):
+    for i in range(len(messages) + 1):
         if n_tokens(tokenizer, messages[:i]) >= target:
             return i, total
     return len(messages), total
@@ -78,7 +78,7 @@ def main(argv=None) -> int:
     for i, idx in enumerate(indices, 1):
         ex = ds[idx]
         base = build_messages(ex)
-        insert_at, total_tokens = find_insert_index_last_pct(tok, base, last_pct=args.last_pct, min_index=0)
+        insert_at, total_tokens = find_insert_index_last_pct(tok, base, last_pct=args.last_pct)
 
         msgs = base[:insert_at] + [needle_msg] + base[insert_at:]
         msgs.append({"role": "user", "content": QUESTION})
