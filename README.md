@@ -22,28 +22,24 @@ python explore_consistentchat.py --split train --head 3
 python explore_consistentchat.py --split train --example-index 0
 ```
 
-If you want to avoid any network access, use:
-
-```bash
-python explore_consistentchat.py --offline --print-dataset --show-features --show-stats
-```
+The dataset is cached locally in this environment, so it should load without extra flags.
 
 ## Needle-In-A-Haystack (NIAH) test
 
-`niah_consistentchat.py` inserts a "needle" (a secret code) into the chat, near a controllable location (by token position), then appends a retrieval question and checks whether the model returns the expected code.
+`niah_consistentchat.py` inserts a "needle" (a secret code) into the chat near the end of the context (by token position), then appends a retrieval question and checks exact-match accuracy using `meta-llama/Llama-3.2-1B-Instruct`.
 
 Examples:
 
 ```bash
-# Insert needle at the start of the last 10% of the chat (by tokens), then query at the end
-python niah_consistentchat.py --last-pct 0.10 --example-index 0 --verbose
+# Default (tests 1 random chat; inserts at last 10% by tokens)
+python niah_consistentchat.py
 
-# Place needle near the very end (last 1%)
-python niah_consistentchat.py --last-pct 0.01 --example-index 0 --verbose
+# Override the model
+python niah_consistentchat.py --model meta-llama/Llama-3.2-1B-Instruct
 
-# Place needle after a specific message index (0-based, within the baseline chat)
-python niah_consistentchat.py --after 12 --example-index 0 --verbose
+# Place needle near the very end (last 1% by tokens)
+python niah_consistentchat.py --last_pct 0.01
 
-# Run on N random chats
-python niah_consistentchat.py --n 50
+# Run on N random chats (deterministic with --seed)
+python niah_consistentchat.py --n 50 --seed 0
 ```

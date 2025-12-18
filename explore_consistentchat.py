@@ -10,7 +10,6 @@ Example:
 Notes:
   - This script does not use streaming.
   - If you already have the dataset cached, it will load locally.
-  - For strict offline mode, pass `--offline`.
 """
 
 from __future__ import annotations
@@ -157,9 +156,9 @@ def save_samples_jsonl(ds: Any, out_path: str, n: int) -> None:
             f.write("\n")
 
 
-def _load_dataset(cache_dir: str | None, offline: bool) -> Any:
+def _load_dataset() -> Any:
     try:
-        from datasets import DownloadConfig, load_dataset  # type: ignore
+        from datasets import load_dataset  # type: ignore
     except Exception as e:  # pragma: no cover
         raise SystemExit(
             "Missing dependency `datasets`. Install with:\n"
@@ -167,26 +166,11 @@ def _load_dataset(cache_dir: str | None, offline: bool) -> Any:
             f"Import error: {e}"
         )
 
-    download_config = None
-    if offline:
-        download_config = DownloadConfig(local_files_only=True)
-
-    return load_dataset(
-        DATASET_NAME,
-        cache_dir=cache_dir,
-        streaming=False,
-        download_config=download_config,
-    )
+    return load_dataset(DATASET_NAME, streaming=False)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cache-dir", default=None, help="Optional HF datasets cache dir.")
-    parser.add_argument(
-        "--offline",
-        action="store_true",
-        help="Force local-only loading (sets HF_*_OFFLINE and uses local_files_only).",
-    )
     parser.add_argument(
         "--split",
         default="all",
@@ -215,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    dataset = _load_dataset(cache_dir=args.cache_dir, offline=args.offline)
+    dataset = _load_dataset()
 
     if args.print_dataset:
         print(dataset)
