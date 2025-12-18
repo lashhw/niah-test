@@ -9,7 +9,6 @@ question and check whether the model returns the expected code.
 
 import argparse
 import random
-import re
 
 import torch
 from datasets import load_dataset
@@ -34,11 +33,6 @@ def build_messages(example):
         {"role": _role(turn.get("from", "")), "content": str(turn.get("value", ""))}
         for turn in example["conversations"]
     ]
-
-
-def normalize(text: str) -> str:
-    text = text.strip()
-    return re.sub(r"^\s*[\"'`]+|[\"'`]+\s*$", "", text).strip()
 
 
 def n_tokens(tokenizer, messages) -> int:
@@ -76,7 +70,7 @@ def main(argv=None) -> int:
         device_map="auto",
     )
 
-    needle = str(random.randint(10**5, 10**6 - 1))
+    needle = str(random.randint(10**8, 10**9 - 1))
     needle_msg = {"role": "user", "content": NEEDLE_TEXT.format(needle=needle)}
     indices = random.sample(range(len(ds)), k=min(args.n, len(ds)))
     correct = 0
@@ -104,9 +98,7 @@ def main(argv=None) -> int:
             )
         answer = tok.decode(out[0, input_ids.shape[-1] :], skip_special_tokens=True).strip()
 
-        got = normalize(answer)
-        exp = normalize(needle)
-        ok = got == exp
+        ok = needle in answer
         correct += int(ok)
 
         frac = n_tokens(tok, base[:insert_at]) / max(1, total_tokens)
