@@ -8,6 +8,7 @@ question and check whether the model returns the expected code.
 
 import argparse
 import random
+from tqdm import tqdm
 
 import torch
 from datasets import load_dataset
@@ -55,7 +56,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="meta-llama/Llama-3.2-1B-Instruct")
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--n", type=int, default=1)
+    parser.add_argument("--total", type=int, default=1)
     parser.add_argument("--last_pct", type=float, default=0.10)
     parser.add_argument(
         "--min_tokens",
@@ -77,10 +78,10 @@ def main():
     )
 
     needle = str(random.randint(10**8, 10**9 - 1))
-    total = min(args.n, len(ds))
+    total = min(args.total, len(ds))
     correct = 0
 
-    for _ in range(total):
+    for _ in tqdm(range(total)):
         msgs = []
         while True:
             msgs.extend(build_messages(ds[random.randrange(len(ds))]))
@@ -103,6 +104,7 @@ def main():
             out = model.generate(
                 **inputs,
                 max_new_tokens=args.max_new_tokens,
+                pad_token_id=tok.eos_token_id,
             )
         answer = tok.decode(out[0, inputs["input_ids"].shape[-1] :], skip_special_tokens=True).strip()
 
