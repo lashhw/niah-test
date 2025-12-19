@@ -75,15 +75,15 @@ def main():
     )
 
     needle = str(random.randint(10**8, 10**9 - 1))
-    indices = random.sample(range(len(ds)), k=min(args.n, len(ds)))
+    total = min(args.n, len(ds))
     correct = 0
 
-    for idx in indices:
-        ex = ds[idx]
-        msgs = build_messages(ex)
-        if args.min_tokens:
-            while n_tokens(tok, msgs) < args.min_tokens:
-                msgs.extend(build_messages(ds[random.randrange(len(ds))]))
+    for _ in range(total):
+        msgs = []
+        while True:
+            msgs.extend(build_messages(ds[random.randrange(len(ds))]))
+            if not args.min_tokens or n_tokens(tok, msgs) >= args.min_tokens:
+                break
 
         insert_at = find_insert_index_last_pct(tok, msgs, args.last_pct)
         needle_at = min(max(insert_at - 1, 0), len(msgs) - 1)
@@ -108,7 +108,6 @@ def main():
         ok = needle in answer
         correct += int(ok)
 
-    total = len(indices)
     print(f"\naccuracy: {correct}/{total} = {correct/total:.3f}")
 
 
