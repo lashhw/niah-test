@@ -31,7 +31,7 @@ def _role(from_field):
 
 def build_messages(example):
     return [
-        {"role": _role(turn["from"]), "content": str(turn["value"])}
+        {"role": _role(turn["from"]), "content": turn["value"]}
         for turn in example["conversations"]
     ]
 
