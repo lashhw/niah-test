@@ -8,6 +8,7 @@ question and check whether the model returns the expected code.
 
 import argparse
 import random
+import string
 from tqdm import tqdm
 
 import torch
@@ -16,8 +17,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 DATASET_NAME = "jiawei-ucas/ConsistentChat"
 SPLIT = "train"
-NEEDLE_TEXT = "By the way, the secret code for urei-dfjc is {needle}. Remember it exactly."
-QUESTION = "What is the secret code for urei-dfjc? Reply with only the code."
+NEEDLE_TEXT = "By the way, the secret code for {topic} is {needle}. Remember it exactly."
+QUESTION = "What is the secret code for {topic}? Reply with only the code."
 
 
 def _role(from_field):
@@ -33,6 +34,13 @@ def build_messages(example):
         {"role": _role(turn["from"]), "content": str(turn["value"])}
         for turn in example["conversations"]
     ]
+
+
+def random_topic():
+    letters = string.ascii_lowercase
+    def chunk(size):
+        return "".join(random.choice(letters) for _ in range(size))
+    return f"{chunk(4)}-{chunk(4)}"
 
 
 def n_tokens(tokenizer, messages):
@@ -88,10 +96,13 @@ def main():
             if not args.min_tokens or n_tokens(tok, msgs) >= args.min_tokens:
                 break
 
+        topic = random_topic()
         insert_at = find_insert_index_last_pct(tok, msgs, args.last_pct)
         needle_at = min(max(insert_at - 1, 0), len(msgs) - 1)
-        msgs[needle_at]["content"] = msgs[needle_at]["content"] + " " + NEEDLE_TEXT.format(needle=needle)
-        msgs.append({"role": "user", "content": QUESTION})
+        msgs[needle_at]["content"] = msgs[needle_at]["content"] + " " + NEEDLE_TEXT.format(
+            topic=topic, needle=needle
+        )
+        msgs.append({"role": "user", "content": QUESTION.format(topic=topic)})
 
         inputs = tok.apply_chat_template(
             msgs,
