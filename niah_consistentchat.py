@@ -35,6 +35,8 @@ def build_messages(example):
 
 
 def n_tokens(tokenizer, messages):
+    if not messages:
+        return 0
     return len(tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=False))
 
 
