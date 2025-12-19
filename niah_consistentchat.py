@@ -16,8 +16,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 DATASET_NAME = "jiawei-ucas/ConsistentChat"
 SPLIT = "train"
-NEEDLE_TEXT = "By the way, the secret code is {needle}. Remember it exactly."
-QUESTION = "What is the secret code? Reply with only the code."
+NEEDLE_TEXT = "By the way, the secret code for urei-dfjc is {needle}. Remember it exactly."
+QUESTION = "What is the secret code for urei-dfjc? Reply with only the code."
 
 
 def _role(from_field):
@@ -46,10 +46,10 @@ def find_insert_index_last_pct(tokenizer, messages, last_pct):
         raise ValueError("--last_pct must be in (0, 1].")
     total = n_tokens(tokenizer, messages)
     target = int(total * (1.0 - last_pct))  # insert at start of last X% tokens
-    for i in range(len(messages) + 1):
-        if n_tokens(tokenizer, messages[:i]) >= target:
-            return i
-    return len(messages)
+    for i in range(len(messages), -1, -1):
+        if n_tokens(tokenizer, messages[:i]) < target:
+            return i + 1
+    return 0
 
 
 def main():
